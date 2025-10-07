@@ -581,38 +581,45 @@ elif page == "➕ Tambah Data":
                 jenis = st.radio("Jenis", ["Pelanggaran", "Prestasi"], horizontal=True)
             
             with col2:
+                selected = ""
+                poin_otomatis = 0
+                
                 if jenis == "Pelanggaran":
                     if not df_db_pelanggaran.empty and "Nama Pelanggaran" in df_db_pelanggaran.columns:
                         pelanggaran_list = df_db_pelanggaran["Nama Pelanggaran"].tolist()
-                        selected = st.selectbox(
-                            "Pilih Pelanggaran 🔍", 
-                            pelanggaran_list,
-                            help="Ketik untuk mencari"
-                        )
-                        poin_row = df_db_pelanggaran[df_db_pelanggaran["Nama Pelanggaran"] == selected]
-                        poin_otomatis = poin_row["Poin"].values[0] if len(poin_row) > 0 else 0
-                        st.number_input("Poin (otomatis)", value=int(poin_otomatis), disabled=True, key="poin_pelang")
+                        if len(pelanggaran_list) > 0:
+                            selected = st.selectbox(
+                                "Pilih Pelanggaran 🔍", 
+                                pelanggaran_list,
+                                help="Ketik untuk mencari"
+                            )
+                            poin_row = df_db_pelanggaran[df_db_pelanggaran["Nama Pelanggaran"] == selected]
+                            poin_otomatis = poin_row["Poin"].values[0] if len(poin_row) > 0 else 0
+                            st.number_input("Poin (otomatis)", value=int(poin_otomatis), disabled=True, key="poin_pelang")
+                        else:
+                            st.warning("⚠️ Database pelanggaran kosong")
                     else:
                         st.warning("⚠️ Database pelanggaran kosong atau format salah")
                         st.info("Pastikan sheet 'pelanggaran' memiliki kolom: Nama Pelanggaran, Poin, Kategori")
-                        selected = ""
-                        poin_otomatis = 0
-                else:
+                
+                elif jenis == "Prestasi":
                     if not df_db_prestasi.empty and "Nama Prestasi" in df_db_prestasi.columns:
                         prestasi_list = df_db_prestasi["Nama Prestasi"].tolist()
-                        selected = st.selectbox(
-                            "Pilih Prestasi 🔍", 
-                            prestasi_list,
-                            help="Ketik untuk mencari"
-                        )
-                        poin_row = df_db_prestasi[df_db_prestasi["Nama Prestasi"] == selected]
-                        poin_otomatis = poin_row["Poin"].values[0] if len(poin_row) > 0 else 0
-                        st.number_input("Poin (otomatis)", value=int(poin_otomatis), disabled=True, key="poin_pres")
+                        if len(prestasi_list) > 0:
+                            selected = st.selectbox(
+                                "Pilih Prestasi 🔍", 
+                                prestasi_list,
+                                help="Ketik untuk mencari",
+                                key="select_prestasi"
+                            )
+                            poin_row = df_db_prestasi[df_db_prestasi["Nama Prestasi"] == selected]
+                            poin_otomatis = poin_row["Poin"].values[0] if len(poin_row) > 0 else 0
+                            st.number_input("Poin (otomatis)", value=int(poin_otomatis), disabled=True, key="poin_pres")
+                        else:
+                            st.warning("⚠️ Database prestasi kosong")
                     else:
                         st.warning("⚠️ Database prestasi kosong atau format salah")
                         st.info("Pastikan sheet 'prestasi' memiliki kolom: Nama Prestasi, Poin, Kategori")
-                        selected = ""
-                        poin_otomatis = 0
             
             # Hitung poin kumulatif
             if not df_rekap.empty and nama:
