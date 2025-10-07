@@ -371,14 +371,18 @@ def load_data():
                     if col in df_rekap.columns:
                         df_rekap[col] = pd.to_numeric(df_rekap[col], errors='coerce').fillna(0)
 
-                # 🔧 FIX: Hitung Total Poin per record
-                # Untuk setiap record: Total = Prestasi - Pelanggaran
+                # 🔧 FIX: Hitung Total Poin per record (dari Google Sheets atau hitung ulang)
                 df_rekap["Total Poin"] = (
                     df_rekap.get("Poin Prestasi", 0) - df_rekap.get("Poin Pelanggaran", 0)
                 )
                 
-                # 📊 Hitung poin kumulatif per siswa
+                # 📊 Hitung poin kumulatif per siswa (sorting by Tanggal penting!)
+                df_rekap['Tanggal'] = pd.to_datetime(df_rekap['Tanggal'], errors='coerce')
+                df_rekap = df_rekap.sort_values(['Nama Siswa', 'Tanggal']).reset_index(drop=True)
                 df_rekap['Poin Kumulatif'] = df_rekap.groupby('Nama Siswa')['Total Poin'].cumsum()
+                
+                # Format tanggal kembali untuk display
+                df_rekap['Tanggal'] = df_rekap['Tanggal'].dt.strftime('%Y-%m-%d %H:%M:%S')
 
             return df_siswa, df_rekap, ws_siswa, ws_rekap
             
@@ -509,10 +513,26 @@ if page == "🏠 Beranda":
     st.subheader("📋 Aktivitas Terbaru")
     if not df_rekap.empty:
         # Tampilkan dengan poin kumulatif
-        recent = df_rekap[['Tanggal', 'Nama Siswa', 'pelanggaran', 'Total Poin', 'Poin Kumulatif']].tail(5)
+        recent_cols = ['Tanggal', 'Nama Siswa', 'Kelas', 'pelanggaran', 'Poin Pelanggaran', 'Poin Prestasi', 'Total Poin', 'Poin Kumulatif']
+        available_cols = [col for col in recent_cols if col in df_rekap.columns]
+        recent = df_rekap[available_cols].tail(10)
         st.dataframe(recent, use_container_width=True, hide_index=True)
     else:
         st.info("Belum ada aktivitas")
+    st.markdown("</div>", unsafe_allow_html=True)
+    
+    # 📊 Poin Kumulatif Terkini per Siswa
+    st.markdown("<div class='card'>", unsafe_allow_html=True)
+    st.subheader("💯 Poin Kumulatif Siswa Terkini")
+    if not df_rekap.empty:
+        # Ambil poin kumulatif terakhir per siswa
+        latest_points = df_rekap.groupby('Nama Siswa').last()[['Kelas', 'Poin Kumulatif']].reset_index()
+        latest_points = latest_points.sort_values('Poin Kumulatif', ascending=False)
+        
+        # Tampilkan top 10
+        st.dataframe(latest_points.head(10), use_container_width=True, hide_index=True)
+    else:
+        st.info("Belum ada data")
     st.markdown("</div>", unsafe_allow_html=True)
 
 # -------------------------------------------------------
@@ -531,8 +551,14 @@ elif page == "➕ Tambah Data":
     else:
         st.markdown("<div class='card'>", unsafe_allow_html=True)
         
-        # 💡 Informasi rumus
-        st.info("💡 **Rumus:** Total Poin = Poin Prestasi - Poin Pelanggaran")
+        # 💡 Informasi & Poin Terkini Siswa
+        col_info1, col_info2 = st.columns(2)
+        with col_info1:
+            st.info("💡 **Rumus:** Total Poin = Prestasi - Pelanggaran\n\n**Poin Kumulatif** = Akumulasi semua poin siswa")
+        
+        with col_info2:
+            if not df_rekap.empty:
+                st.success("📊 **Poin Kumulatif Tersedia**\n\nSiswa terdaftar: " + str(len(df_rekap['Nama Siswa'].unique())))
         
         with st.form("form_tambah"):
             col1, col2 = st.columns(2)
@@ -546,6 +572,15 @@ elif page == "➕ Tambah Data":
                 else:
                     kelas = ""
                 st.text_input("Kelas", value=kelas, disabled=True)
+                
+                # Tampilkan poin kumulatif saat ini
+                if not df_rekap.empty and nama:
+                    student_records = df_rekap[df_rekap['Nama Siswa'] == nama]
+                    if not student_records.empty:
+                        current_points = student_records.iloc[-1]['Poin Kumulatif']
+                        st.metric("Poin Kumulatif Saat Ini", f"{current_points:+.0f}")
+                    else:
+                        st.metric("Poin Kumulatif Saat Ini", "0 (Belum ada record)")
             
             with col2:
                 pelanggaran = st.text_input("Jenis Pelanggaran / Prestasi")
@@ -557,10 +592,35 @@ elif page == "➕ Tambah Data":
             # 🔧 FIX: Preview dengan rumus yang benar
             total_preview = poin_prestasi - poin_pelanggaran
             
-            if total_preview >= 0:
-                st.success(f"💡 **Total Poin:** +{total_preview} (Prestasi {poin_prestasi} - Pelanggaran {poin_pelanggaran})")
+            # Hitung prediksi poin kumulatif baru
+            if not df_rekap.empty and nama:
+                student_records = df_rekap[df_rekap['Nama Siswa'] == nama]
+                if not student_records.empty:
+                    current_cumulative = student_records.iloc[-1]['Poin Kumulatif']
+                    new_cumulative = current_cumulative + total_preview
+                    
+                    col_preview1, col_preview2 = st.columns(2)
+                    with col_preview1:
+                        if total_preview >= 0:
+                            st.success(f"💡 **Total Record Ini:** +{total_preview}\n\n(Prestasi {poin_prestasi} - Pelanggaran {poin_pelanggaran})")
+                        else:
+                            st.warning(f"💡 **Total Record Ini:** {total_preview}\n\n(Prestasi {poin_prestasi} - Pelanggaran {poin_pelanggaran})")
+                    
+                    with col_preview2:
+                        if new_cumulative >= 0:
+                            st.info(f"📊 **Poin Kumulatif Baru:**\n\n{current_cumulative:+.0f} → **{new_cumulative:+.0f}**")
+                        else:
+                            st.error(f"📊 **Poin Kumulatif Baru:**\n\n{current_cumulative:+.0f} → **{new_cumulative:+.0f}**")
+                else:
+                    if total_preview >= 0:
+                        st.success(f"💡 **Total Poin:** +{total_preview} | **Poin Kumulatif:** {total_preview:+d} (Record pertama)")
+                    else:
+                        st.warning(f"💡 **Total Poin:** {total_preview} | **Poin Kumulatif:** {total_preview:+d} (Record pertama)")
             else:
-                st.warning(f"💡 **Total Poin:** {total_preview} (Prestasi {poin_prestasi} - Pelanggaran {poin_pelanggaran})")
+                if total_preview >= 0:
+                    st.success(f"💡 **Total Poin:** +{total_preview}")
+                else:
+                    st.warning(f"💡 **Total Poin:** {total_preview}")
             
             submit = st.form_submit_button("✅ Simpan Data", use_container_width=True)
             
@@ -579,7 +639,17 @@ elif page == "➕ Tambah Data":
                         tanggal, nama, kelas, pelanggaran,
                         poin_pelanggaran, poin_prestasi, total
                     ])
-                    st.success(f"✅ Data berhasil disimpan untuk {nama} (Total: {total:+d})")
+                    
+                    # Hitung poin kumulatif baru untuk success message
+                    new_cumulative = "N/A"
+                    if not df_rekap.empty:
+                        student_records = df_rekap[df_rekap['Nama Siswa'] == nama]
+                        if not student_records.empty:
+                            current_cumulative = student_records.iloc[-1]['Poin Kumulatif']
+                            new_cumulative = current_cumulative + total
+                    
+                    st.success(f"✅ Data berhasil disimpan untuk **{nama}**\n\n"
+                              f"Total record ini: **{total:+d}** | Poin Kumulatif: **{new_cumulative if isinstance(new_cumulative, str) else f'{new_cumulative:+.0f}'}**")
                     st.balloons()
                     st.cache_data.clear()
                     st.rerun()
