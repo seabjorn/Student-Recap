@@ -360,14 +360,14 @@ def load_data():
             if len(all_rekap) <= 1:
                 df_rekap = pd.DataFrame(columns=[
                     "Tanggal", "Nama Siswa", "Kelas", "pelanggaran",
-                    "Poin Pelanggaran", "Poin Prestasi", "Total Poin"
+                    "Poin Pelanggaran", "Poin Prestasi", "Total Poin", "Poin Kumulatif"
                 ])
             else:
                 df_rekap = pd.DataFrame(all_rekap[1:], columns=all_rekap[0])
                 df_rekap.columns = df_rekap.columns.str.strip()
 
                 # Konversi tipe data numerik dengan error handling
-                for col in ["Poin Pelanggaran", "Poin Prestasi", "Total Poin"]:
+                for col in ["Poin Pelanggaran", "Poin Prestasi", "Total Poin", "Poin Kumulatif"]:
                     if col in df_rekap.columns:
                         df_rekap[col] = pd.to_numeric(df_rekap[col], errors='coerce').fillna(0)
 
@@ -591,10 +591,10 @@ elif page == "➕ Tambah Data":
                     ws_rekap_write = spreadsheet.worksheet("rekap_pelanggaran")
                     
                     tanggal = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    # Simpan poin per transaksi (bukan total akumulatif)
+                    # Simpan dengan kolom Poin Kumulatif
                     ws_rekap_write.append_row([
                         tanggal, nama, kelas, pelanggaran,
-                        poin_pelanggaran, poin_prestasi, poin_baru
+                        poin_pelanggaran, poin_prestasi, poin_baru, total_poin_sesudah
                     ])
                     st.success(f"✅ Data berhasil disimpan untuk {nama}! Total poin sekarang: {total_poin_sesudah:+.0f}")
                     st.balloons()
