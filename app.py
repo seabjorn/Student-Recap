@@ -362,6 +362,19 @@ def load_data():
             else:
                 df_db_pelanggaran = pd.DataFrame(all_pelanggaran[1:], columns=all_pelanggaran[0])
                 df_db_pelanggaran.columns = df_db_pelanggaran.columns.str.strip()
+                # Normalisasi nama kolom jika tidak match
+                col_mapping = {}
+                for col in df_db_pelanggaran.columns:
+                    col_lower = col.lower()
+                    if 'nama' in col_lower and 'pelanggaran' in col_lower:
+                        col_mapping[col] = 'Nama Pelanggaran'
+                    elif 'poin' in col_lower:
+                        col_mapping[col] = 'Poin'
+                    elif 'kategori' in col_lower:
+                        col_mapping[col] = 'Kategori'
+                if col_mapping:
+                    df_db_pelanggaran.rename(columns=col_mapping, inplace=True)
+                
                 if "Poin" in df_db_pelanggaran.columns:
                     df_db_pelanggaran["Poin"] = pd.to_numeric(df_db_pelanggaran["Poin"], errors='coerce').fillna(0)
 
@@ -371,6 +384,19 @@ def load_data():
             else:
                 df_db_prestasi = pd.DataFrame(all_prestasi[1:], columns=all_prestasi[0])
                 df_db_prestasi.columns = df_db_prestasi.columns.str.strip()
+                # Normalisasi nama kolom jika tidak match
+                col_mapping = {}
+                for col in df_db_prestasi.columns:
+                    col_lower = col.lower()
+                    if 'nama' in col_lower and 'prestasi' in col_lower:
+                        col_mapping[col] = 'Nama Prestasi'
+                    elif 'poin' in col_lower:
+                        col_mapping[col] = 'Poin'
+                    elif 'kategori' in col_lower:
+                        col_mapping[col] = 'Kategori'
+                if col_mapping:
+                    df_db_prestasi.rename(columns=col_mapping, inplace=True)
+                
                 if "Poin" in df_db_prestasi.columns:
                     df_db_prestasi["Poin"] = pd.to_numeric(df_db_prestasi["Poin"], errors='coerce').fillna(0)
 
@@ -556,31 +582,35 @@ elif page == "➕ Tambah Data":
             
             with col2:
                 if jenis == "Pelanggaran":
-                    if not df_db_pelanggaran.empty:
+                    if not df_db_pelanggaran.empty and "Nama Pelanggaran" in df_db_pelanggaran.columns:
                         pelanggaran_list = df_db_pelanggaran["Nama Pelanggaran"].tolist()
                         selected = st.selectbox(
                             "Pilih Pelanggaran 🔍", 
                             pelanggaran_list,
                             help="Ketik untuk mencari"
                         )
-                        poin_otomatis = df_db_pelanggaran[df_db_pelanggaran["Nama Pelanggaran"] == selected]["Poin"].values[0]
+                        poin_row = df_db_pelanggaran[df_db_pelanggaran["Nama Pelanggaran"] == selected]
+                        poin_otomatis = poin_row["Poin"].values[0] if len(poin_row) > 0 else 0
                         st.number_input("Poin (otomatis)", value=int(poin_otomatis), disabled=True, key="poin_pelang")
                     else:
-                        st.warning("Database pelanggaran kosong")
+                        st.warning("⚠️ Database pelanggaran kosong atau format salah")
+                        st.info("Pastikan sheet 'pelanggaran' memiliki kolom: Nama Pelanggaran, Poin, Kategori")
                         selected = ""
                         poin_otomatis = 0
                 else:
-                    if not df_db_prestasi.empty:
+                    if not df_db_prestasi.empty and "Nama Prestasi" in df_db_prestasi.columns:
                         prestasi_list = df_db_prestasi["Nama Prestasi"].tolist()
                         selected = st.selectbox(
                             "Pilih Prestasi 🔍", 
                             prestasi_list,
                             help="Ketik untuk mencari"
                         )
-                        poin_otomatis = df_db_prestasi[df_db_prestasi["Nama Prestasi"] == selected]["Poin"].values[0]
+                        poin_row = df_db_prestasi[df_db_prestasi["Nama Prestasi"] == selected]
+                        poin_otomatis = poin_row["Poin"].values[0] if len(poin_row) > 0 else 0
                         st.number_input("Poin (otomatis)", value=int(poin_otomatis), disabled=True, key="poin_pres")
                     else:
-                        st.warning("Database prestasi kosong")
+                        st.warning("⚠️ Database prestasi kosong atau format salah")
+                        st.info("Pastikan sheet 'prestasi' memiliki kolom: Nama Prestasi, Poin, Kategori")
                         selected = ""
                         poin_otomatis = 0
             
