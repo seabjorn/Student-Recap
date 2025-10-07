@@ -371,7 +371,8 @@ def load_data():
                     if col in df_rekap.columns:
                         df_rekap[col] = pd.to_numeric(df_rekap[col], errors='coerce').fillna(0)
 
-                # Hitung ulang Total Poin untuk memastikan konsistensi
+                # 🔧 FIX: Hitung ulang Total Poin dengan rumus yang benar
+                # Total Poin = Prestasi (positif) - Pelanggaran (negatif)
                 df_rekap["Total Poin"] = (
                     df_rekap.get("Poin Prestasi", 0) - df_rekap.get("Poin Pelanggaran", 0)
                 )
@@ -415,6 +416,7 @@ with st.sidebar:
         st.write("**Versi:** 3.0 Dark Mode")
         st.write("**Data:** Real-time Google Sheets")
         st.write("**Update:** Auto-refresh 5 menit")
+        st.write("**Rumus:** Total = Prestasi - Pelanggaran")
 
 # -------------------------------------------------------
 # 🏠 HALAMAN BERANDA
@@ -521,6 +523,9 @@ elif page == "➕ Tambah Data":
     else:
         st.markdown("<div class='card'>", unsafe_allow_html=True)
         
+        # 💡 Informasi rumus
+        st.info("💡 **Rumus:** Total Poin = Poin Prestasi - Poin Pelanggaran")
+        
         with st.form("form_tambah"):
             col1, col2 = st.columns(2)
             
@@ -536,11 +541,18 @@ elif page == "➕ Tambah Data":
             
             with col2:
                 pelanggaran = st.text_input("Jenis Pelanggaran / Prestasi")
-                poin_pelanggaran = st.number_input("Poin Pelanggaran", min_value=0, value=0)
-                poin_prestasi = st.number_input("Poin Prestasi", min_value=0, value=0)
+                poin_pelanggaran = st.number_input("Poin Pelanggaran", min_value=0, value=0, 
+                                                   help="Nilai minus (dikurangi dari total)")
+                poin_prestasi = st.number_input("Poin Prestasi", min_value=0, value=0,
+                                               help="Nilai plus (ditambah ke total)")
             
+            # 🔧 FIX: Preview dengan rumus yang benar
             total_preview = poin_prestasi - poin_pelanggaran
-            st.info(f"💡 **Total Poin:** {total_preview:+d}")
+            
+            if total_preview >= 0:
+                st.success(f"💡 **Total Poin:** +{total_preview} (Prestasi {poin_prestasi} - Pelanggaran {poin_pelanggaran})")
+            else:
+                st.warning(f"💡 **Total Poin:** {total_preview} (Prestasi {poin_prestasi} - Pelanggaran {poin_pelanggaran})")
             
             submit = st.form_submit_button("✅ Simpan Data", use_container_width=True)
             
@@ -552,12 +564,14 @@ elif page == "➕ Tambah Data":
                     ws_rekap_write = spreadsheet.worksheet("rekap_pelanggaran")
                     
                     tanggal = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    # 🔧 FIX: Hitung total dengan rumus yang benar
                     total = poin_prestasi - poin_pelanggaran
+                    
                     ws_rekap_write.append_row([
                         tanggal, nama, kelas, pelanggaran,
                         poin_pelanggaran, poin_prestasi, total
                     ])
-                    st.success(f"✅ Data berhasil disimpan untuk {nama}")
+                    st.success(f"✅ Data berhasil disimpan untuk {nama} (Total: {total:+d})")
                     st.balloons()
                     st.cache_data.clear()
                     st.rerun()
@@ -757,7 +771,7 @@ elif page == "🏆 Ranking":
 st.divider()
 st.markdown(
     f"<div style='text-align: center; color: var(--text-secondary); padding: 1rem;'>"
-    f"💻 Dashboard Siswa v3.0 Dark Mode | "
+    f"💻 Dashboard Siswa v3.1 | "
     f"Update: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | "
     f"© 2024"
     f"</div>",
