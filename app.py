@@ -371,19 +371,6 @@ def load_data():
                     if col in df_rekap.columns:
                         df_rekap[col] = pd.to_numeric(df_rekap[col], errors='coerce').fillna(0)
 
-                # 🔧 FIX: Hitung Total Poin per record (dari Google Sheets atau hitung ulang)
-                df_rekap["Total Poin"] = (
-                    df_rekap.get("Poin Prestasi", 0) - df_rekap.get("Poin Pelanggaran", 0)
-                )
-                
-                # 📊 Hitung poin kumulatif per siswa (sorting by Tanggal penting!)
-                df_rekap['Tanggal'] = pd.to_datetime(df_rekap['Tanggal'], errors='coerce')
-                df_rekap = df_rekap.sort_values(['Nama Siswa', 'Tanggal']).reset_index(drop=True)
-                df_rekap['Poin Kumulatif'] = df_rekap.groupby('Nama Siswa')['Total Poin'].cumsum()
-                
-                # Format tanggal kembali untuk display
-                df_rekap['Tanggal'] = df_rekap['Tanggal'].dt.strftime('%Y-%m-%d %H:%M:%S')
-
             return df_siswa, df_rekap, ws_siswa, ws_rekap
             
         except Exception as e:
@@ -420,10 +407,9 @@ with st.sidebar:
         st.rerun()
     
     with st.expander("ℹ️ Informasi"):
-        st.write("**Versi:** 3.1 Kumulatif")
+        st.write("**Versi:** 3.0 Dark Mode")
         st.write("**Data:** Real-time Google Sheets")
         st.write("**Update:** Auto-refresh 5 menit")
-        st.write("**Rumus:** Poin Kumulatif per Siswa")
 
 # -------------------------------------------------------
 # 🏠 HALAMAN BERANDA
@@ -470,9 +456,16 @@ if page == "🏠 Beranda":
     
     with col4:
         # Safe mean calculation dengan konversi numerik
-        if not df_rekap.empty and 'Total Poin' in df_rekap.columns:
-            total_poin_numeric = pd.to_numeric(df_rekap['Total Poin'], errors='coerce')
-            avg_poin = total_poin_numeric.mean() if not total_poin_numeric.isna().all() else 0
+        if not df_rekap.empty and 'Poin Pelanggaran' in df_rekap.columns and 'Poin Prestasi' in df_rekap.columns:
+            df_temp = df_rekap.copy()
+            df_temp['Poin Pelanggaran'] = pd.to_numeric(df_temp['Poin Pelanggaran'], errors='coerce').fillna(0)
+            df_temp['Poin Prestasi'] = pd.to_numeric(df_temp['Poin Prestasi'], errors='coerce').fillna(0)
+            summary_temp = df_temp.groupby('Nama Siswa').agg({
+                'Poin Prestasi': 'sum',
+                'Poin Pelanggaran': 'sum'
+            })
+            summary_temp['Total'] = summary_temp['Poin Prestasi'] - summary_temp['Poin Pelanggaran']
+            avg_poin = summary_temp['Total'].mean() if len(summary_temp) > 0 else 0
         else:
             avg_poin = 0
             
@@ -487,12 +480,13 @@ if page == "🏠 Beranda":
     # Chart
     st.markdown("<div class='card'>", unsafe_allow_html=True)
     if not df_rekap.empty and 'Kelas' in df_rekap.columns:
-        st.subheader("📈 Poin Kumulatif per Kelas")
-        # Ambil poin kumulatif terakhir per siswa, lalu group by kelas
-        latest_per_student = df_rekap.groupby('Nama Siswa').last().reset_index()
-        df_grouped = latest_per_student.groupby('Kelas')['Poin Kumulatif'].sum().reset_index()
-        df_grouped = df_grouped.rename(columns={'Poin Kumulatif': 'Total Poin'})
-        
+        st.subheader("📈 Distribusi Poin per Kelas")
+        df_temp = df_rekap.copy()
+        df_temp['Poin Pelanggaran'] = pd.to_numeric(df_temp['Poin Pelanggaran'], errors='coerce').fillna(0)
+        df_temp['Poin Prestasi'] = pd.to_numeric(df_temp['Poin Prestasi'], errors='coerce').fillna(0)
+        df_temp['Total'] = df_temp['Poin Prestasi'] - df_temp['Poin Pelanggaran']
+        df_grouped = df_temp.groupby('Kelas')['Total'].sum().reset_index()
+        df_grouped.columns = ['Kelas', 'Total Poin']
         fig = px.bar(
             df_grouped, x='Kelas', y='Total Poin',
             color='Total Poin',
@@ -510,29 +504,32 @@ if page == "🏠 Beranda":
     
     # Recent Activity
     st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.subheader("📋 Aktivitas Terbaru")
+    st.subheader("📋 Aktivitas Terbaru (5 Terakhir)")
     if not df_rekap.empty:
-        # Tampilkan dengan poin kumulatif
-        recent_cols = ['Tanggal', 'Nama Siswa', 'Kelas', 'pelanggaran', 'Poin Pelanggaran', 'Poin Prestasi', 'Total Poin', 'Poin Kumulatif']
-        available_cols = [col for col in recent_cols if col in df_rekap.columns]
-        recent = df_rekap[available_cols].tail(10)
+        recent = df_rekap[['Tanggal', 'Nama Siswa', 'pelanggaran', 'Poin Pelanggaran', 'Poin Prestasi']].tail(5)
         st.dataframe(recent, use_container_width=True, hide_index=True)
     else:
         st.info("Belum ada aktivitas")
     st.markdown("</div>", unsafe_allow_html=True)
     
-    # 📊 Poin Kumulatif Terkini per Siswa
+    # Total Poin Per Siswa
     st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.subheader("💯 Poin Kumulatif Siswa Terkini")
+    st.subheader("👥 Total Poin Per Siswa (Akumulatif)")
     if not df_rekap.empty:
-        # Ambil poin kumulatif terakhir per siswa
-        latest_points = df_rekap.groupby('Nama Siswa').last()[['Kelas', 'Poin Kumulatif']].reset_index()
-        latest_points = latest_points.sort_values('Poin Kumulatif', ascending=False)
+        df_rekap_numeric = df_rekap.copy()
+        df_rekap_numeric['Poin Pelanggaran'] = pd.to_numeric(df_rekap_numeric['Poin Pelanggaran'], errors='coerce').fillna(0)
+        df_rekap_numeric['Poin Prestasi'] = pd.to_numeric(df_rekap_numeric['Poin Prestasi'], errors='coerce').fillna(0)
         
-        # Tampilkan top 10
-        st.dataframe(latest_points.head(10), use_container_width=True, hide_index=True)
+        summary = df_rekap_numeric.groupby('Nama Siswa').agg({
+            'Poin Pelanggaran': 'sum',
+            'Poin Prestasi': 'sum'
+        }).reset_index()
+        summary['Total Poin'] = summary['Poin Prestasi'] - summary['Poin Pelanggaran']
+        summary = summary.sort_values('Total Poin', ascending=False)
+        
+        st.dataframe(summary, use_container_width=True, hide_index=True)
     else:
-        st.info("Belum ada data")
+        st.info("Belum ada data siswa")
     st.markdown("</div>", unsafe_allow_html=True)
 
 # -------------------------------------------------------
@@ -551,15 +548,6 @@ elif page == "➕ Tambah Data":
     else:
         st.markdown("<div class='card'>", unsafe_allow_html=True)
         
-        # 💡 Informasi & Poin Terkini Siswa
-        col_info1, col_info2 = st.columns(2)
-        with col_info1:
-            st.info("💡 **Rumus:** Total Poin = Prestasi - Pelanggaran\n\n**Poin Kumulatif** = Akumulasi semua poin siswa")
-        
-        with col_info2:
-            if not df_rekap.empty:
-                st.success("📊 **Poin Kumulatif Tersedia**\n\nSiswa terdaftar: " + str(len(df_rekap['Nama Siswa'].unique())))
-        
         with st.form("form_tambah"):
             col1, col2 = st.columns(2)
             
@@ -572,55 +560,26 @@ elif page == "➕ Tambah Data":
                 else:
                     kelas = ""
                 st.text_input("Kelas", value=kelas, disabled=True)
-                
-                # Tampilkan poin kumulatif saat ini
-                if not df_rekap.empty and nama:
-                    student_records = df_rekap[df_rekap['Nama Siswa'] == nama]
-                    if not student_records.empty:
-                        current_points = student_records.iloc[-1]['Poin Kumulatif']
-                        st.metric("Poin Kumulatif Saat Ini", f"{current_points:+.0f}")
-                    else:
-                        st.metric("Poin Kumulatif Saat Ini", "0 (Belum ada record)")
             
             with col2:
                 pelanggaran = st.text_input("Jenis Pelanggaran / Prestasi")
-                poin_pelanggaran = st.number_input("Poin Pelanggaran", min_value=0, value=0, 
-                                                   help="Nilai minus (dikurangi dari total)")
-                poin_prestasi = st.number_input("Poin Prestasi", min_value=0, value=0,
-                                               help="Nilai plus (ditambah ke total)")
+                poin_pelanggaran = st.number_input("Poin Pelanggaran", min_value=0, value=0)
+                poin_prestasi = st.number_input("Poin Prestasi", min_value=0, value=0)
             
-            # 🔧 FIX: Preview dengan rumus yang benar
-            total_preview = poin_prestasi - poin_pelanggaran
-            
-            # Hitung prediksi poin kumulatif baru
+            # Hitung total poin saat ini siswa
             if not df_rekap.empty and nama:
-                student_records = df_rekap[df_rekap['Nama Siswa'] == nama]
-                if not student_records.empty:
-                    current_cumulative = student_records.iloc[-1]['Poin Kumulatif']
-                    new_cumulative = current_cumulative + total_preview
-                    
-                    col_preview1, col_preview2 = st.columns(2)
-                    with col_preview1:
-                        if total_preview >= 0:
-                            st.success(f"💡 **Total Record Ini:** +{total_preview}\n\n(Prestasi {poin_prestasi} - Pelanggaran {poin_pelanggaran})")
-                        else:
-                            st.warning(f"💡 **Total Record Ini:** {total_preview}\n\n(Prestasi {poin_prestasi} - Pelanggaran {poin_pelanggaran})")
-                    
-                    with col_preview2:
-                        if new_cumulative >= 0:
-                            st.info(f"📊 **Poin Kumulatif Baru:**\n\n{current_cumulative:+.0f} → **{new_cumulative:+.0f}**")
-                        else:
-                            st.error(f"📊 **Poin Kumulatif Baru:**\n\n{current_cumulative:+.0f} → **{new_cumulative:+.0f}**")
-                else:
-                    if total_preview >= 0:
-                        st.success(f"💡 **Total Poin:** +{total_preview} | **Poin Kumulatif:** {total_preview:+d} (Record pertama)")
-                    else:
-                        st.warning(f"💡 **Total Poin:** {total_preview} | **Poin Kumulatif:** {total_preview:+d} (Record pertama)")
+                df_siswa_rekap = df_rekap[df_rekap['Nama Siswa'] == nama]
+                total_poin_sebelum = (
+                    pd.to_numeric(df_siswa_rekap['Poin Prestasi'], errors='coerce').sum() - 
+                    pd.to_numeric(df_siswa_rekap['Poin Pelanggaran'], errors='coerce').sum()
+                )
             else:
-                if total_preview >= 0:
-                    st.success(f"💡 **Total Poin:** +{total_preview}")
-                else:
-                    st.warning(f"💡 **Total Poin:** {total_preview}")
+                total_poin_sebelum = 0
+            
+            poin_baru = poin_prestasi - poin_pelanggaran
+            total_poin_sesudah = total_poin_sebelum + poin_baru
+            
+            st.info(f"📊 **Poin Sebelum:** {total_poin_sebelum:+.0f} → **Poin Input:** {poin_baru:+d} → **Total Poin Setelah:** {total_poin_sesudah:+.0f}")
             
             submit = st.form_submit_button("✅ Simpan Data", use_container_width=True)
             
@@ -632,24 +591,12 @@ elif page == "➕ Tambah Data":
                     ws_rekap_write = spreadsheet.worksheet("rekap_pelanggaran")
                     
                     tanggal = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    # 🔧 FIX: Hitung total dengan rumus yang benar
-                    total = poin_prestasi - poin_pelanggaran
-                    
+                    # Simpan poin per transaksi (bukan total akumulatif)
                     ws_rekap_write.append_row([
                         tanggal, nama, kelas, pelanggaran,
-                        poin_pelanggaran, poin_prestasi, total
+                        poin_pelanggaran, poin_prestasi, poin_baru
                     ])
-                    
-                    # Hitung poin kumulatif baru untuk success message
-                    new_cumulative = "N/A"
-                    if not df_rekap.empty:
-                        student_records = df_rekap[df_rekap['Nama Siswa'] == nama]
-                        if not student_records.empty:
-                            current_cumulative = student_records.iloc[-1]['Poin Kumulatif']
-                            new_cumulative = current_cumulative + total
-                    
-                    st.success(f"✅ Data berhasil disimpan untuk **{nama}**\n\n"
-                              f"Total record ini: **{total:+d}** | Poin Kumulatif: **{new_cumulative if isinstance(new_cumulative, str) else f'{new_cumulative:+.0f}'}**")
+                    st.success(f"✅ Data berhasil disimpan untuk {nama}! Total poin sekarang: {total_poin_sesudah:+.0f}")
                     st.balloons()
                     st.cache_data.clear()
                     st.rerun()
@@ -667,83 +614,95 @@ elif page == "📋 Lihat Data":
     st.markdown("""
     <div class='main-header'>
         <h1>📋 Data Rekap</h1>
-        <p>Lihat riwayat dan poin kumulatif siswa</p>
+        <p>Lihat, filter, dan export data</p>
     </div>
     """, unsafe_allow_html=True)
     
-    if df_rekap.empty:
-        st.info("🔭 Belum ada data")
-    else:
-        st.markdown("<div class='card'>", unsafe_allow_html=True)
-        
-        # Info tentang poin kumulatif
-        st.info("💡 **Total Poin** = Poin per record | **Poin Kumulatif** = Akumulasi semua poin siswa")
-        
-        col1, col2, col3 = st.columns([2, 1, 1])
-        
-        with col1:
-            search = st.text_input("🔍 Cari nama atau deskripsi", "")
-        
-        with col2:
-            kelas_filter = st.selectbox("Filter Kelas", ["Semua"] + sorted(df_rekap['Kelas'].unique().tolist()))
-        
-        with col3:
-            st.write("")
-            st.write("")
-            if st.button("🔄 Terapkan Filter", use_container_width=True):
-                st.rerun()
-        
-        df_filtered = df_rekap.copy()
-        
-        if search:
-            df_filtered = df_filtered[
-                df_filtered['Nama Siswa'].str.contains(search, case=False, na=False) |
-                df_filtered['pelanggaran'].str.contains(search, case=False, na=False)
-            ]
-        
-        if kelas_filter != "Semua":
-            df_filtered = df_filtered[df_filtered['Kelas'] == kelas_filter]
-        
-        st.dataframe(df_filtered, use_container_width=True, hide_index=True)
-        
-        # 📈 Grafik Poin Kumulatif per Siswa (jika ada filter siswa tertentu)
-        if search and len(df_filtered) > 0:
-            st.subheader("📈 Grafik Poin Kumulatif")
-            selected_students = df_filtered['Nama Siswa'].unique()
+    tab1, tab2 = st.tabs(["📜 Riwayat Transaksi", "📊 Total Poin Per Siswa"])
+    
+    with tab1:
+        st.markdown("### 📜 Semua Riwayat Transaksi")
+        if df_rekap.empty:
+            st.info("📭 Belum ada data")
+        else:
+            st.markdown("<div class='card'>", unsafe_allow_html=True)
             
-            for student in selected_students[:3]:  # Max 3 siswa
-                student_data = df_filtered[df_filtered['Nama Siswa'] == student].copy()
-                student_data = student_data.sort_index()
-                
-                fig = px.line(
-                    student_data, 
-                    x=student_data.index, 
-                    y='Poin Kumulatif',
-                    title=f'Riwayat Poin: {student}',
-                    markers=True,
-                    template='plotly_dark'
-                )
-                fig.update_layout(
-                    plot_bgcolor='rgba(0,0,0,0)',
-                    paper_bgcolor='rgba(0,0,0,0)',
-                    font_color='#e5e7eb',
-                    height=300,
-                    xaxis_title="Record",
-                    yaxis_title="Poin Kumulatif"
-                )
-                st.plotly_chart(fig, use_container_width=True)
-        
-        csv = df_filtered.to_csv(index=False)
-        st.download_button(
-            "📥 Export CSV",
-            csv,
-            f"rekap_{datetime.now().strftime('%Y%m%d')}.csv",
-            "text/csv",
-            use_container_width=True
-        )
-        
-        st.caption(f"Menampilkan {len(df_filtered)} dari {len(df_rekap)} data")
-        st.markdown("</div>", unsafe_allow_html=True)
+            col1, col2, col3 = st.columns([2, 1, 1])
+            
+            with col1:
+                search = st.text_input("🔍 Cari nama atau deskripsi", "")
+            
+            with col2:
+                kelas_filter = st.selectbox("Filter Kelas", ["Semua"] + sorted(df_rekap['Kelas'].unique().tolist()))
+            
+            with col3:
+                st.write("")
+                st.write("")
+                if st.button("🔄 Terapkan Filter", use_container_width=True):
+                    st.rerun()
+            
+            df_filtered = df_rekap.copy()
+            
+            if search:
+                df_filtered = df_filtered[
+                    df_filtered['Nama Siswa'].str.contains(search, case=False, na=False) |
+                    df_filtered['pelanggaran'].str.contains(search, case=False, na=False)
+                ]
+            
+            if kelas_filter != "Semua":
+                df_filtered = df_filtered[df_filtered['Kelas'] == kelas_filter]
+            
+            st.dataframe(df_filtered, use_container_width=True, hide_index=True)
+            
+            csv = df_filtered.to_csv(index=False)
+            st.download_button(
+                "📥 Export CSV",
+                csv,
+                f"rekap_transaksi_{datetime.now().strftime('%Y%m%d')}.csv",
+                "text/csv",
+                use_container_width=True
+            )
+            
+            st.caption(f"Menampilkan {len(df_filtered)} dari {len(df_rekap)} transaksi")
+            st.markdown("</div>", unsafe_allow_html=True)
+    
+    with tab2:
+        st.markdown("### 📊 Total Poin Akumulatif Per Siswa")
+        if df_rekap.empty:
+            st.info("📭 Belum ada data")
+        else:
+            st.markdown("<div class='card'>", unsafe_allow_html=True)
+            
+            # Hitung total per siswa
+            df_rekap_numeric = df_rekap.copy()
+            df_rekap_numeric['Poin Pelanggaran'] = pd.to_numeric(df_rekap_numeric['Poin Pelanggaran'], errors='coerce').fillna(0)
+            df_rekap_numeric['Poin Prestasi'] = pd.to_numeric(df_rekap_numeric['Poin Prestasi'], errors='coerce').fillna(0)
+            
+            summary = df_rekap_numeric.groupby(['Nama Siswa', 'Kelas']).agg({
+                'Poin Pelanggaran': 'sum',
+                'Poin Prestasi': 'sum'
+            }).reset_index()
+            summary['Total Poin'] = summary['Poin Prestasi'] - summary['Poin Pelanggaran']
+            summary = summary.sort_values('Total Poin', ascending=False)
+            
+            # Filter
+            search_siswa = st.text_input("🔍 Cari nama siswa", "", key="search_summary")
+            if search_siswa:
+                summary = summary[summary['Nama Siswa'].str.contains(search_siswa, case=False, na=False)]
+            
+            st.dataframe(summary, use_container_width=True, hide_index=True)
+            
+            csv_summary = summary.to_csv(index=False)
+            st.download_button(
+                "📥 Export Summary CSV",
+                csv_summary,
+                f"summary_poin_{datetime.now().strftime('%Y%m%d')}.csv",
+                "text/csv",
+                use_container_width=True
+            )
+            
+            st.caption(f"Menampilkan {len(summary)} siswa")
+            st.markdown("</div>", unsafe_allow_html=True)
 
 # -------------------------------------------------------
 # 👥 HALAMAN KELOLA SISWA
@@ -817,15 +776,18 @@ elif page == "🏆 Ranking":
     """, unsafe_allow_html=True)
     
     if df_rekap.empty:
-        st.warning("🔭 Belum ada data untuk ranking")
+        st.warning("📭 Belum ada data untuk ranking")
     else:
-        # 🔧 Gunakan poin kumulatif terakhir per siswa untuk ranking
+        # Konversi Total Poin ke numerik sebelum groupby
         df_rekap_numeric = df_rekap.copy()
-        df_rekap_numeric['Poin Kumulatif'] = pd.to_numeric(df_rekap_numeric['Poin Kumulatif'], errors='coerce').fillna(0)
+        df_rekap_numeric['Poin Pelanggaran'] = pd.to_numeric(df_rekap_numeric['Poin Pelanggaran'], errors='coerce').fillna(0)
+        df_rekap_numeric['Poin Prestasi'] = pd.to_numeric(df_rekap_numeric['Poin Prestasi'], errors='coerce').fillna(0)
         
-        # Ambil record terakhir (poin kumulatif terbaru) per siswa
-        ranking = df_rekap_numeric.groupby('Nama Siswa').last().reset_index()
-        ranking = ranking[['Nama Siswa', 'Poin Kumulatif']].rename(columns={'Poin Kumulatif': 'Total Poin'})
+        ranking = df_rekap_numeric.groupby('Nama Siswa').agg({
+            'Poin Prestasi': 'sum',
+            'Poin Pelanggaran': 'sum'
+        }).reset_index()
+        ranking['Total Poin'] = ranking['Poin Prestasi'] - ranking['Poin Pelanggaran']
         ranking = ranking.sort_values('Total Poin', ascending=False).reset_index(drop=True)
         
         st.markdown("<div class='card'>", unsafe_allow_html=True)
@@ -881,7 +843,7 @@ elif page == "🏆 Ranking":
 st.divider()
 st.markdown(
     f"<div style='text-align: center; color: var(--text-secondary); padding: 1rem;'>"
-    f"💻 Dashboard Siswa v3.1 | "
+    f"💻 Dashboard Siswa v3.0 Dark Mode | "
     f"Update: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | "
     f"© 2024"
     f"</div>",
