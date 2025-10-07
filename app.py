@@ -591,10 +591,16 @@ elif page == "➕ Tambah Data":
                     ws_rekap_write = spreadsheet.worksheet("rekap_pelanggaran")
                     
                     tanggal = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    # Simpan dengan kolom Poin Kumulatif
+                    # Konversi ke tipe Python native untuk menghindari error JSON serializable
                     ws_rekap_write.append_row([
-                        tanggal, nama, kelas, pelanggaran,
-                        poin_pelanggaran, poin_prestasi, poin_baru, total_poin_sesudah
+                        tanggal, 
+                        nama, 
+                        kelas, 
+                        pelanggaran,
+                        int(poin_pelanggaran), 
+                        int(poin_prestasi), 
+                        int(poin_baru), 
+                        float(total_poin_sesudah)
                     ])
                     st.success(f"✅ Data berhasil disimpan untuk {nama}! Total poin sekarang: {total_poin_sesudah:+.0f}")
                     st.balloons()
