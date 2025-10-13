@@ -15,11 +15,11 @@ st.set_page_config(
 )
 
 # -------------------------------------------------------
-# 🎨 CSS DARK THEME PREMIUM
+# 🎨 CSS DARK THEME PREMIUM (REFINED)
 # -------------------------------------------------------
 DARK_CSS = """
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 * {
     margin: 0;
@@ -28,24 +28,27 @@ DARK_CSS = """
 }
 
 :root {
-    --primary: #6366f1;
-    --primary-dark: #4f46e5;
-    --secondary: #10b981;
-    --bg-main: #0a0a0f;
-    --bg-card: #1a1a24;
-    --bg-sidebar: #13131b;
-    --text-primary: #e5e7eb;
-    --text-secondary: #9ca3af;
-    --border: #2d2d3d;
-    --shadow: rgba(0, 0, 0, 0.5);
+    --primary: #667eea;
+    --primary-dark: #5a67d8;
+    --secondary: #48bb78;
+    --accent: #ed8936;
+    --bg-main: #0f172a;
+    --bg-card: #1e293b;
+    --bg-sidebar: #1a202c;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --border: #334155;
+    --shadow: rgba(0, 0, 0, 0.3);
 }
 
 html, body, .main, .stApp {
     background: var(--bg-main) !important;
     color: var(--text-primary) !important;
     font-family: 'Inter', sans-serif;
+    font-weight: 400;
 }
 
+/* Sidebar Styling */
 section[data-testid="stSidebar"] {
     background: var(--bg-sidebar) !important;
     border-right: 1px solid var(--border);
@@ -58,151 +61,207 @@ section[data-testid="stSidebar"] > div {
 
 section[data-testid="stSidebar"] h2 {
     color: var(--primary);
-    font-size: 1.5rem;
-    font-weight: 700;
+    font-size: 1.4rem;
+    font-weight: 600;
     margin-bottom: 1.5rem;
+    letter-spacing: -0.5px;
 }
 
-section[data-testid="stSidebar"] .stSelectbox label {
+section[data-testid="stSidebar"] .stSelectbox label,
+section[data-testid="stSidebar"] .stRadio label {
     color: var(--text-primary) !important;
     font-weight: 500;
-    font-size: 0.9rem;
+    font-size: 0.875rem;
+    letter-spacing: 0.025em;
 }
 
 section[data-testid="stSidebar"] [data-baseweb="select"] {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
     border-radius: 8px;
 }
 
 section[data-testid="stSidebar"] button {
-    background: var(--primary);
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
     color: white;
     border: none;
     border-radius: 8px;
-    padding: 0.6rem 1rem;
+    padding: 0.65rem 1rem;
     font-weight: 600;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
     width: 100%;
+    font-size: 0.9rem;
 }
 
 section[data-testid="stSidebar"] button:hover {
-    background: var(--primary-dark);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 8px 16px rgba(102, 126, 234, 0.4);
 }
 
+/* Main Header with Animation */
 .main-header {
-    background: var(--bg-card);
-    padding: 1.5rem 2rem;
-    border-radius: 12px;
+    background: linear-gradient(135deg, var(--bg-card) 0%, #2d3748 100%);
+    padding: 2rem 2.5rem;
+    border-radius: 16px;
     margin-bottom: 2rem;
     border: 1px solid var(--border);
-    box-shadow: 0 4px 20px var(--shadow);
+    box-shadow: 0 4px 24px var(--shadow);
+    position: relative;
+    overflow: hidden;
+}
+
+.main-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+    animation: shine 3s infinite;
+}
+
+@keyframes shine {
+    0% { left: -100%; }
+    100% { left: 100%; }
 }
 
 .main-header h1 {
-    color: var(--primary);
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     font-size: 2rem;
     font-weight: 700;
     margin: 0;
+    letter-spacing: -1px;
 }
 
 .main-header p {
     color: var(--text-secondary);
-    margin: 0.5rem 0 0 0;
+    margin: 0.75rem 0 0 0;
     font-size: 0.95rem;
+    font-weight: 400;
 }
 
+/* Card Styling */
 .card {
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: 12px;
-    padding: 1.5rem;
+    padding: 1.75rem;
     margin-bottom: 1.5rem;
-    box-shadow: 0 4px 20px var(--shadow);
+    box-shadow: 0 2px 12px var(--shadow);
     transition: all 0.3s ease;
 }
 
 .card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 30px var(--shadow);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.4);
     border-color: var(--primary);
 }
 
 .card h2, .card h3 {
-    color: var(--primary);
+    color: var(--text-primary);
     margin-bottom: 1rem;
     font-weight: 600;
+    font-size: 1.25rem;
+    letter-spacing: -0.5px;
 }
 
+/* Stat Box with Gradient */
 .stat-box {
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    background: var(--bg-card);
+    border: 1px solid var(--border);
     border-radius: 12px;
     padding: 1.5rem;
     text-align: center;
-    color: white;
-    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
-    transition: all 0.3s;
+    box-shadow: 0 2px 12px var(--shadow);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-box::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
 }
 
 .stat-box:hover {
-    transform: scale(1.05);
-    box-shadow: 0 6px 30px rgba(99, 102, 241, 0.5);
-}
-
-.stat-box .icon {
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
 }
 
 .stat-box .label {
-    font-size: 0.9rem;
-    opacity: 0.9;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
     font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 0.5rem;
 }
 
 .stat-box .value {
-    font-size: 2rem;
+    font-size: 2.5rem;
     font-weight: 700;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     margin-top: 0.5rem;
 }
 
+/* Form Inputs */
 .stTextInput input, .stNumberInput input, .stSelectbox select {
     background: var(--bg-main) !important;
     border: 1px solid var(--border) !important;
     border-radius: 8px !important;
     color: var(--text-primary) !important;
-    padding: 0.6rem !important;
+    padding: 0.65rem !important;
+    font-size: 0.9rem !important;
+    transition: all 0.2s ease !important;
 }
 
-.stTextInput input:focus, .stNumberInput input:focus {
+.stTextInput input:focus, .stNumberInput input:focus, .stSelectbox select:focus {
     border-color: var(--primary) !important;
-    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2) !important;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2) !important;
+    outline: none !important;
 }
 
 .stTextInput label, .stNumberInput label, .stSelectbox label {
     color: var(--text-primary) !important;
     font-weight: 500 !important;
     margin-bottom: 0.5rem !important;
+    font-size: 0.9rem !important;
 }
 
-.stButton button {
-    background: var(--primary);
+/* Buttons */
+.stButton button, .stDownloadButton button {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
     color: white;
     border: none;
     border-radius: 8px;
-    padding: 0.7rem 1.5rem;
+    padding: 0.75rem 1.5rem;
     font-weight: 600;
-    transition: all 0.3s;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
 }
 
-.stButton button:hover {
-    background: var(--primary-dark);
+.stButton button:hover, .stDownloadButton button:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
+.stDownloadButton button {
+    background: linear-gradient(135deg, var(--secondary), #38a169);
+}
+
+/* DataFrames */
 .stDataFrame {
     border-radius: 12px;
     overflow: hidden;
@@ -215,68 +274,98 @@ section[data-testid="stSidebar"] button:hover {
 }
 
 .stDataFrame th {
-    background: var(--primary) !important;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark)) !important;
     color: white !important;
     font-weight: 600 !important;
     padding: 1rem !important;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
 }
 
 .stDataFrame td {
     border-color: var(--border) !important;
-    padding: 0.8rem !important;
+    padding: 0.85rem !important;
+    font-size: 0.9rem;
 }
 
-.streamlit-expanderHeader {
+/* Metrics */
+.stMetric {
+    background: var(--bg-card);
+    padding: 1.25rem;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+}
+
+.stMetric label {
+    color: var(--text-secondary) !important;
+    font-size: 0.85rem !important;
+    font-weight: 500 !important;
+}
+
+.stMetric [data-testid="stMetricValue"] {
+    color: var(--primary) !important;
+    font-size: 1.75rem !important;
+    font-weight: 700 !important;
+}
+
+/* Alerts */
+.stAlert {
     background: var(--bg-card) !important;
     border: 1px solid var(--border) !important;
     border-radius: 8px !important;
     color: var(--text-primary) !important;
 }
 
-.stMetric {
-    background: var(--bg-card);
-    padding: 1rem;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-}
-
-.stMetric label {
-    color: var(--text-secondary) !important;
-}
-
-.stMetric [data-testid="stMetricValue"] {
-    color: var(--primary) !important;
-}
-
-.stAlert {
-    background: var(--bg-card) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 8px !important;
-}
-
+/* Divider */
 hr {
     border-color: var(--border) !important;
     margin: 2rem 0 !important;
+    opacity: 0.5;
 }
 
-.stDownloadButton button {
-    background: var(--secondary);
+/* Tabs */
+.stTabs [data-baseweb="tab-list"] {
+    gap: 8px;
+    background: transparent;
+}
+
+.stTabs [data-baseweb="tab"] {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+}
+
+.stTabs [aria-selected="true"] {
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
     color: white;
+    border-color: var(--primary);
 }
 
-.stDownloadButton button:hover {
-    background: #059669;
+/* Expander */
+.streamlit-expanderHeader {
+    background: var(--bg-card) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+    color: var(--text-primary) !important;
+    font-weight: 500 !important;
 }
 
+/* Caption */
 .caption {
     color: var(--text-secondary);
     font-size: 0.85rem;
     margin-top: 0.5rem;
+    font-style: italic;
 }
 
+/* Scrollbar */
 ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
 }
 
 ::-webkit-scrollbar-track {
@@ -285,11 +374,64 @@ hr {
 
 ::-webkit-scrollbar-thumb {
     background: var(--border);
-    border-radius: 4px;
+    border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
     background: var(--primary);
+}
+
+/* Podium Styles */
+.podium-item {
+    background: var(--bg-card);
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin: 0.5rem 0;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.podium-item:hover {
+    transform: translateX(8px);
+    border-color: var(--primary);
+}
+
+.podium-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+}
+
+.podium-gold::before { background: #FFD700; }
+.podium-silver::before { background: #C0C0C0; }
+.podium-bronze::before { background: #CD7F32; }
+
+.podium-item h3 {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.podium-item p {
+    margin: 0.5rem 0 0 0;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+
+/* Radio Buttons */
+.stRadio > div {
+    flex-direction: row !important;
+    gap: 1rem;
+}
+
+.stRadio label {
+    color: var(--text-primary) !important;
 }
 </style>
 """
@@ -362,7 +504,8 @@ def load_data():
             else:
                 df_db_pelanggaran = pd.DataFrame(all_pelanggaran[1:], columns=all_pelanggaran[0])
                 df_db_pelanggaran.columns = df_db_pelanggaran.columns.str.strip()
-                # Normalisasi nama kolom jika tidak match
+                
+                # Normalisasi nama kolom
                 col_mapping = {}
                 for col in df_db_pelanggaran.columns:
                     col_lower = col.lower()
@@ -384,7 +527,8 @@ def load_data():
             else:
                 df_db_prestasi = pd.DataFrame(all_prestasi[1:], columns=all_prestasi[0])
                 df_db_prestasi.columns = df_db_prestasi.columns.str.strip()
-                # Normalisasi nama kolom jika tidak match
+                
+                # Normalisasi nama kolom
                 col_mapping = {}
                 for col in df_db_prestasi.columns:
                     col_lower = col.lower()
@@ -404,11 +548,11 @@ def load_data():
             
         except Exception as e:
             if attempt < max_retries - 1:
-                st.warning(f"⚠️ Koneksi gagal (percobaan {attempt + 1}/{max_retries}), mencoba lagi...")
+                st.warning(f"Koneksi gagal (percobaan {attempt + 1}/{max_retries}), mencoba lagi...")
                 time.sleep(2)
             else:
-                st.error(f"❌ Gagal memuat data: {e}")
-                st.info("""💡 **Solusi:**
+                st.error(f"Gagal memuat data: {e}")
+                st.info("""**Solusi:**
                 1. Pastikan Anda sudah membuat 4 sheets:
                    - `data_siswa` (kolom: Nama, Kelas, NIS)
                    - `rekap_pelanggaran` (kolom: Tanggal, Nama Siswa, Kelas, Jenis, Deskripsi, Poin, Poin Kumulatif)
@@ -425,32 +569,32 @@ df_siswa, df_rekap, df_db_pelanggaran, df_db_prestasi, ws_siswa, ws_rekap, ws_pe
 # 🧭 SIDEBAR NAVIGATION
 # -------------------------------------------------------
 with st.sidebar:
-    st.markdown("<h2>📚 Dashboard Siswa</h2>", unsafe_allow_html=True)
+    st.markdown("<h2>Dashboard Siswa</h2>", unsafe_allow_html=True)
     
     page = st.selectbox(
         "Pilih Menu",
-        ["🏠 Beranda", "➕ Tambah Data", "📋 Lihat Data", "👥 Kelola Siswa", 
-         "🏆 Ranking", "🗂️ Database Pelanggaran", "⭐ Database Prestasi"]
+        ["Beranda", "Tambah Data", "Lihat Data", "Kelola Siswa", 
+         "Ranking", "Database Pelanggaran", "Database Prestasi"]
     )
     
     st.divider()
     
-    if st.button("🔄 Refresh Data"):
+    if st.button("Refresh Data"):
         st.cache_data.clear()
         st.rerun()
     
-    with st.expander("ℹ️ Informasi"):
-        st.write("**Versi:** 3.1 Database System")
+    with st.expander("Informasi"):
+        st.write("**Versi:** 3.2 Enhanced")
         st.write("**Data:** Real-time Google Sheets")
         st.write("**Update:** Auto-refresh 5 menit")
 
 # -------------------------------------------------------
 # 🏠 HALAMAN BERANDA
 # -------------------------------------------------------
-if page == "🏠 Beranda":
+if page == "Beranda":
     st.markdown(f"""
     <div class='main-header'>
-        <h1>🏠 Selamat Datang di Dashboard</h1>
+        <h1>Selamat Datang di Dashboard</h1>
         <p>Kelola pelanggaran dan prestasi siswa secara real-time • Update terakhir: {datetime.now().strftime('%d %B %Y, %H:%M')}</p>
     </div>
     """, unsafe_allow_html=True)
@@ -460,7 +604,6 @@ if page == "🏠 Beranda":
     with col1:
         st.markdown(f"""
         <div class='stat-box'>
-            <div class='icon'>👥</div>
             <div class='label'>Total Siswa</div>
             <div class='value'>{len(df_siswa)}</div>
         </div>
@@ -470,7 +613,6 @@ if page == "🏠 Beranda":
         pelanggaran_count = len(df_rekap[df_rekap.get('Jenis', '') == 'Pelanggaran']) if not df_rekap.empty else 0
         st.markdown(f"""
         <div class='stat-box'>
-            <div class='icon'>⚠️</div>
             <div class='label'>Pelanggaran</div>
             <div class='value'>{pelanggaran_count}</div>
         </div>
@@ -480,7 +622,6 @@ if page == "🏠 Beranda":
         prestasi_count = len(df_rekap[df_rekap.get('Jenis', '') == 'Prestasi']) if not df_rekap.empty else 0
         st.markdown(f"""
         <div class='stat-box'>
-            <div class='icon'>⭐</div>
             <div class='label'>Prestasi</div>
             <div class='value'>{prestasi_count}</div>
         </div>
@@ -497,7 +638,6 @@ if page == "🏠 Beranda":
             
         st.markdown(f"""
         <div class='stat-box'>
-            <div class='icon'>📊</div>
             <div class='label'>Rata-rata Poin</div>
             <div class='value'>{avg_poin:.1f}</div>
         </div>
@@ -505,7 +645,7 @@ if page == "🏠 Beranda":
     
     st.markdown("<div class='card'>", unsafe_allow_html=True)
     if not df_rekap.empty and 'Kelas' in df_rekap.columns:
-        st.subheader("📈 Distribusi Poin per Kelas")
+        st.subheader("Distribusi Poin per Kelas")
         df_temp = df_rekap.copy()
         df_temp['Poin'] = pd.to_numeric(df_temp['Poin'], errors='coerce').fillna(0)
         df_grouped = df_temp.groupby('Kelas')['Poin'].sum().reset_index()
@@ -519,14 +659,14 @@ if page == "🏠 Beranda":
         fig.update_layout(
             plot_bgcolor='rgba(0,0,0,0)',
             paper_bgcolor='rgba(0,0,0,0)',
-            font_color='#e5e7eb',
+            font_color='#f1f5f9',
             height=400
         )
         st.plotly_chart(fig, use_container_width=True)
     st.markdown("</div>", unsafe_allow_html=True)
     
     st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.subheader("📋 Aktivitas Terbaru (5 Terakhir)")
+    st.subheader("Aktivitas Terbaru (5 Terakhir)")
     if not df_rekap.empty:
         recent = df_rekap[['Tanggal', 'Nama Siswa', 'Jenis', 'Deskripsi', 'Poin']].tail(5)
         st.dataframe(recent, use_container_width=True, hide_index=True)
@@ -535,7 +675,7 @@ if page == "🏠 Beranda":
     st.markdown("</div>", unsafe_allow_html=True)
     
     st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.subheader("👥 Total Poin Per Siswa (Kumulatif Terkini)")
+    st.subheader("Total Poin Per Siswa (Kumulatif Terkini)")
     if not df_rekap.empty:
         df_temp = df_rekap.copy()
         df_temp['Poin Kumulatif'] = pd.to_numeric(df_temp['Poin Kumulatif'], errors='coerce').fillna(0)
@@ -553,16 +693,16 @@ if page == "🏠 Beranda":
 # -------------------------------------------------------
 # ➕ HALAMAN TAMBAH DATA
 # -------------------------------------------------------
-elif page == "➕ Tambah Data":
+elif page == "Tambah Data":
     st.markdown("""
     <div class='main-header'>
-        <h1>➕ Tambah Data Baru</h1>
+        <h1>Tambah Data Baru</h1>
         <p>Input pelanggaran atau prestasi siswa dengan database terintegrasi</p>
     </div>
     """, unsafe_allow_html=True)
     
     if df_siswa.empty:
-        st.warning("⚠️ Daftar siswa kosong. Tambahkan siswa terlebih dahulu.")
+        st.warning("Daftar siswa kosong. Tambahkan siswa terlebih dahulu.")
     else:
         st.markdown("<div class='card'>", unsafe_allow_html=True)
         
@@ -589,17 +729,19 @@ elif page == "➕ Tambah Data":
                         pelanggaran_list = df_db_pelanggaran["Nama Pelanggaran"].tolist()
                         if len(pelanggaran_list) > 0:
                             selected = st.selectbox(
-                                "Pilih Pelanggaran 🔍", 
+                                "Pilih Pelanggaran", 
                                 pelanggaran_list,
-                                help="Ketik untuk mencari"
+                                help="Ketik untuk mencari",
+                                key="select_pelanggaran_input"
                             )
                             poin_row = df_db_pelanggaran[df_db_pelanggaran["Nama Pelanggaran"] == selected]
-                            poin_otomatis = poin_row["Poin"].values[0] if len(poin_row) > 0 else 0
+                            if len(poin_row) > 0:
+                                poin_otomatis = float(poin_row["Poin"].values[0])
                             st.number_input("Poin (otomatis)", value=int(poin_otomatis), disabled=True, key="poin_pelang")
                         else:
-                            st.warning("⚠️ Database pelanggaran kosong")
+                            st.warning("Database pelanggaran kosong")
                     else:
-                        st.warning("⚠️ Database pelanggaran kosong atau format salah")
+                        st.warning("Database pelanggaran kosong atau format salah")
                         st.info("Pastikan sheet 'pelanggaran' memiliki kolom: Nama Pelanggaran, Poin, Kategori")
                 
                 elif jenis == "Prestasi":
@@ -607,18 +749,19 @@ elif page == "➕ Tambah Data":
                         prestasi_list = df_db_prestasi["Nama Prestasi"].tolist()
                         if len(prestasi_list) > 0:
                             selected = st.selectbox(
-                                "Pilih Prestasi 🔍", 
+                                "Pilih Prestasi", 
                                 prestasi_list,
                                 help="Ketik untuk mencari",
-                                key="select_prestasi"
+                                key="select_prestasi_input"
                             )
                             poin_row = df_db_prestasi[df_db_prestasi["Nama Prestasi"] == selected]
-                            poin_otomatis = poin_row["Poin"].values[0] if len(poin_row) > 0 else 0
+                            if len(poin_row) > 0:
+                                poin_otomatis = float(poin_row["Poin"].values[0])
                             st.number_input("Poin (otomatis)", value=int(poin_otomatis), disabled=True, key="poin_pres")
                         else:
-                            st.warning("⚠️ Database prestasi kosong")
+                            st.warning("Database prestasi kosong")
                     else:
-                        st.warning("⚠️ Database prestasi kosong atau format salah")
+                        st.warning("Database prestasi kosong atau format salah")
                         st.info("Pastikan sheet 'prestasi' memiliki kolom: Nama Prestasi, Poin, Kategori")
             
             # Hitung poin kumulatif
@@ -635,11 +778,11 @@ elif page == "➕ Tambah Data":
             poin_input = -poin_otomatis if jenis == "Pelanggaran" else poin_otomatis
             poin_kumulatif_baru = poin_kumulatif_sebelum + poin_input
             
-            st.info(f"📊 **Poin Sebelum:** {poin_kumulatif_sebelum:+.0f} → **Poin Input:** {poin_input:+.0f} → **Total Poin Setelah:** {poin_kumulatif_baru:+.0f}")
+            st.info(f"**Poin Sebelum:** {poin_kumulatif_sebelum:+.0f} → **Poin Input:** {poin_input:+.0f} → **Total Poin Setelah:** {poin_kumulatif_baru:+.0f}")
             
-            submit = st.form_submit_button("✅ Simpan Data", use_container_width=True)
+            submit = st.form_submit_button("Simpan Data", use_container_width=True)
             
-            if submit and selected:
+            if submit and selected and poin_otomatis > 0:
                 try:
                     client = get_gspread_client()
                     spreadsheet = client.open_by_key("1U-RPsmFwSwtdRkMdUlxsndpq15JtZHDulnkf-0v5gCc")
@@ -655,41 +798,41 @@ elif page == "➕ Tambah Data":
                         float(poin_input),
                         float(poin_kumulatif_baru)
                     ])
-                    st.success(f"✅ Data berhasil disimpan untuk {nama}! Total poin sekarang: {poin_kumulatif_baru:+.0f}")
+                    st.success(f"Data berhasil disimpan untuk {nama}! Total poin sekarang: {poin_kumulatif_baru:+.0f}")
                     st.balloons()
                     st.cache_data.clear()
                     st.rerun()
                 except Exception as e:
-                    st.error(f"❌ Gagal menyimpan: {e}")
+                    st.error(f"Gagal menyimpan: {e}")
             elif submit:
-                st.warning("⚠️ Pilih pelanggaran/prestasi terlebih dahulu!")
+                st.warning("Pilih pelanggaran/prestasi terlebih dahulu!")
         
         st.markdown("</div>", unsafe_allow_html=True)
 
 # -------------------------------------------------------
 # 📋 HALAMAN LIHAT DATA
 # -------------------------------------------------------
-elif page == "📋 Lihat Data":
+elif page == "Lihat Data":
     st.markdown("""
     <div class='main-header'>
-        <h1>📋 Data Rekap</h1>
+        <h1>Data Rekap</h1>
         <p>Lihat, filter, dan export data</p>
     </div>
     """, unsafe_allow_html=True)
     
-    tab1, tab2 = st.tabs(["📜 Riwayat Transaksi", "📊 Total Poin Per Siswa"])
+    tab1, tab2 = st.tabs(["Riwayat Transaksi", "Total Poin Per Siswa"])
     
     with tab1:
-        st.markdown("### 📜 Semua Riwayat Transaksi")
+        st.markdown("### Semua Riwayat Transaksi")
         if df_rekap.empty:
-            st.info("📭 Belum ada data")
+            st.info("Belum ada data")
         else:
             st.markdown("<div class='card'>", unsafe_allow_html=True)
             
             col1, col2, col3 = st.columns([2, 1, 1])
             
             with col1:
-                search = st.text_input("🔍 Cari nama atau deskripsi", "")
+                search = st.text_input("Cari nama atau deskripsi", "")
             
             with col2:
                 kelas_filter = st.selectbox("Filter Kelas", ["Semua"] + sorted(df_rekap['Kelas'].unique().tolist()))
@@ -715,7 +858,7 @@ elif page == "📋 Lihat Data":
             
             csv = df_filtered.to_csv(index=False)
             st.download_button(
-                "📥 Export CSV",
+                "Export CSV",
                 csv,
                 f"rekap_transaksi_{datetime.now().strftime('%Y%m%d')}.csv",
                 "text/csv",
@@ -726,9 +869,9 @@ elif page == "📋 Lihat Data":
             st.markdown("</div>", unsafe_allow_html=True)
     
     with tab2:
-        st.markdown("### 📊 Total Poin Akumulatif Per Siswa")
+        st.markdown("### Total Poin Akumulatif Per Siswa")
         if df_rekap.empty:
-            st.info("📭 Belum ada data")
+            st.info("Belum ada data")
         else:
             st.markdown("<div class='card'>", unsafe_allow_html=True)
             
@@ -740,7 +883,7 @@ elif page == "📋 Lihat Data":
             summary.columns = ['Nama Siswa', 'Kelas', 'Total Poin']
             summary = summary.sort_values('Total Poin', ascending=False)
             
-            search_siswa = st.text_input("🔍 Cari nama siswa", "", key="search_summary")
+            search_siswa = st.text_input("Cari nama siswa", "", key="search_summary")
             if search_siswa:
                 summary = summary[summary['Nama Siswa'].str.contains(search_siswa, case=False, na=False)]
             
@@ -748,7 +891,7 @@ elif page == "📋 Lihat Data":
             
             csv_summary = summary.to_csv(index=False)
             st.download_button(
-                "📥 Export Summary CSV",
+                "Export Summary CSV",
                 csv_summary,
                 f"summary_poin_{datetime.now().strftime('%Y%m%d')}.csv",
                 "text/csv",
@@ -761,10 +904,10 @@ elif page == "📋 Lihat Data":
 # -------------------------------------------------------
 # 👥 HALAMAN KELOLA SISWA
 # -------------------------------------------------------
-elif page == "👥 Kelola Siswa":
+elif page == "Kelola Siswa":
     st.markdown("""
     <div class='main-header'>
-        <h1>👥 Kelola Siswa</h1>
+        <h1>Kelola Siswa</h1>
         <p>Manajemen data siswa</p>
     </div>
     """, unsafe_allow_html=True)
@@ -773,9 +916,9 @@ elif page == "👥 Kelola Siswa":
     
     with col1:
         st.markdown("<div class='card'>", unsafe_allow_html=True)
-        st.subheader("📋 Daftar Siswa")
+        st.subheader("Daftar Siswa")
         
-        search = st.text_input("🔍 Cari siswa", "")
+        search = st.text_input("Cari siswa", "")
         df_filtered = df_siswa.copy()
         
         if search:
@@ -785,20 +928,20 @@ elif page == "👥 Kelola Siswa":
         
         if not df_siswa.empty:
             per_kelas = df_siswa['Kelas'].value_counts().to_dict()
-            st.caption(f"📊 Distribusi: {per_kelas}")
+            st.caption(f"Distribusi: {per_kelas}")
         
         st.markdown("</div>", unsafe_allow_html=True)
     
     with col2:
         st.markdown("<div class='card'>", unsafe_allow_html=True)
-        st.subheader("➕ Tambah Siswa")
+        st.subheader("Tambah Siswa")
         
         with st.form("form_siswa"):
             new_nama = st.text_input("Nama Lengkap")
             new_kelas = st.text_input("Kelas")
             new_nis = st.text_input("NIS")
             
-            submit = st.form_submit_button("✅ Simpan", use_container_width=True)
+            submit = st.form_submit_button("Simpan", use_container_width=True)
             
             if submit and all([new_nama.strip(), new_kelas.strip(), new_nis.strip()]):
                 try:
@@ -807,29 +950,29 @@ elif page == "👥 Kelola Siswa":
                     ws_siswa_write = spreadsheet.worksheet("data_siswa")
                     
                     ws_siswa_write.append_row([new_nama, new_kelas, new_nis])
-                    st.success(f"✅ {new_nama} berhasil ditambahkan!")
+                    st.success(f"{new_nama} berhasil ditambahkan!")
                     st.cache_data.clear()
                     st.rerun()
                 except Exception as e:
-                    st.error(f"❌ Gagal: {e}")
+                    st.error(f"Gagal: {e}")
             elif submit:
-                st.warning("⚠️ Lengkapi semua field!")
+                st.warning("Lengkapi semua field!")
         
         st.markdown("</div>", unsafe_allow_html=True)
 
 # -------------------------------------------------------
 # 🏆 HALAMAN RANKING
 # -------------------------------------------------------
-elif page == "🏆 Ranking":
+elif page == "Ranking":
     st.markdown("""
     <div class='main-header'>
-        <h1>🏆 Ranking Siswa</h1>
+        <h1>Ranking Siswa</h1>
         <p>Leaderboard berdasarkan total poin</p>
     </div>
     """, unsafe_allow_html=True)
     
     if df_rekap.empty:
-        st.warning("📭 Belum ada data untuk ranking")
+        st.warning("Belum ada data untuk ranking")
     else:
         df_temp = df_rekap.copy()
         df_temp['Poin Kumulatif'] = pd.to_numeric(df_temp['Poin Kumulatif'], errors='coerce').fillna(0)
@@ -842,26 +985,23 @@ elif page == "🏆 Ranking":
         ranking = ranking.sort_values('Total Poin', ascending=False).reset_index(drop=True)
         
         st.markdown("<div class='card'>", unsafe_allow_html=True)
-        st.subheader("🥇 Top 3 Performer")
+        st.subheader("Top 3 Performer")
         
+        podium_classes = ["podium-gold", "podium-silver", "podium-bronze"]
         medals = ["🥇", "🥈", "🥉"]
-        colors = ["#FFD700", "#C0C0C0", "#CD7F32"]
         
         for idx, row in ranking.head(3).iterrows():
             st.markdown(f"""
-            <div style='background: linear-gradient(135deg, {colors[idx]}, rgba(255,255,255,0.1)); 
-                        padding: 1rem; border-radius: 12px; margin: 0.5rem 0; border: 1px solid {colors[idx]};'>
-                <h3 style='margin:0; color: white;'>{medals[idx]} {row['Nama Siswa']}</h3>
-                <p style='margin:0.3rem 0 0 0; color: white; opacity: 0.9;'>
-                    Total Poin: <strong>{row['Total Poin']:.0f}</strong> | Kelas: {row['Kelas']}
-                </p>
+            <div class='podium-item {podium_classes[idx]}'>
+                <h3>{medals[idx]} {row['Nama Siswa']}</h3>
+                <p>Total Poin: <strong>{row['Total Poin']:.0f}</strong> | Kelas: {row['Kelas']}</p>
             </div>
             """, unsafe_allow_html=True)
         
         st.markdown("</div>", unsafe_allow_html=True)
         
         st.markdown("<div class='card'>", unsafe_allow_html=True)
-        st.subheader("📊 Ranking Lengkap")
+        st.subheader("Ranking Lengkap")
         st.dataframe(ranking, use_container_width=True, hide_index=True)
         st.markdown("</div>", unsafe_allow_html=True)
         
@@ -876,7 +1016,7 @@ elif page == "🏆 Ranking":
         fig.update_layout(
             plot_bgcolor='rgba(0,0,0,0)',
             paper_bgcolor='rgba(0,0,0,0)',
-            font_color='#e5e7eb',
+            font_color='#f1f5f9',
             height=500,
             showlegend=False
         )
@@ -885,17 +1025,17 @@ elif page == "🏆 Ranking":
         
         col1, col2 = st.columns(2)
         with col1:
-            st.metric("🥇 Siswa Terbaik", ranking.iloc[0]['Nama Siswa'])
+            st.metric("Siswa Terbaik", ranking.iloc[0]['Nama Siswa'])
         with col2:
-            st.metric("📈 Poin Tertinggi", f"{ranking.iloc[0]['Total Poin']:.0f}")
+            st.metric("Poin Tertinggi", f"{ranking.iloc[0]['Total Poin']:.0f}")
 
 # -------------------------------------------------------
 # 🗂️ HALAMAN DATABASE PELANGGARAN
 # -------------------------------------------------------
-elif page == "🗂️ Database Pelanggaran":
+elif page == "Database Pelanggaran":
     st.markdown("""
     <div class='main-header'>
-        <h1>🗂️ Database Pelanggaran</h1>
+        <h1>Database Pelanggaran</h1>
         <p>Kelola daftar pelanggaran dan poinnya</p>
     </div>
     """, unsafe_allow_html=True)
@@ -904,12 +1044,12 @@ elif page == "🗂️ Database Pelanggaran":
     
     with col1:
         st.markdown("<div class='card'>", unsafe_allow_html=True)
-        st.subheader("📋 Daftar Pelanggaran")
+        st.subheader("Daftar Pelanggaran")
         
         if df_db_pelanggaran.empty:
-            st.info("📭 Database pelanggaran kosong")
+            st.info("Database pelanggaran kosong")
         else:
-            search = st.text_input("🔍 Cari pelanggaran", "", key="search_pelang")
+            search = st.text_input("Cari pelanggaran", "", key="search_pelang")
             df_filtered = df_db_pelanggaran.copy()
             
             if search:
@@ -922,7 +1062,7 @@ elif page == "🗂️ Database Pelanggaran":
     
     with col2:
         st.markdown("<div class='card'>", unsafe_allow_html=True)
-        st.subheader("➕ Tambah Pelanggaran")
+        st.subheader("Tambah Pelanggaran")
         
         with st.form("form_pelanggaran"):
             nama_pelang = st.text_input("Nama Pelanggaran")
@@ -931,9 +1071,9 @@ elif page == "🗂️ Database Pelanggaran":
                 "Ringan", "Sedang", "Berat", "Sangat Berat"
             ])
             
-            st.info("💡 Poin akan disimpan sebagai nilai positif, tapi dikurangi saat input ke siswa")
+            st.info("Poin akan disimpan sebagai nilai positif, tapi dikurangi saat input ke siswa")
             
-            submit = st.form_submit_button("✅ Simpan", use_container_width=True)
+            submit = st.form_submit_button("Simpan", use_container_width=True)
             
             if submit and nama_pelang.strip():
                 try:
@@ -942,23 +1082,23 @@ elif page == "🗂️ Database Pelanggaran":
                     ws_pelang_write = spreadsheet.worksheet("pelanggaran")
                     
                     ws_pelang_write.append_row([nama_pelang, int(poin_pelang), kategori_pelang])
-                    st.success(f"✅ Pelanggaran '{nama_pelang}' berhasil ditambahkan!")
+                    st.success(f"Pelanggaran '{nama_pelang}' berhasil ditambahkan!")
                     st.cache_data.clear()
                     st.rerun()
                 except Exception as e:
-                    st.error(f"❌ Gagal: {e}")
+                    st.error(f"Gagal: {e}")
             elif submit:
-                st.warning("⚠️ Isi nama pelanggaran!")
+                st.warning("Isi nama pelanggaran!")
         
         st.markdown("</div>", unsafe_allow_html=True)
 
 # -------------------------------------------------------
 # ⭐ HALAMAN DATABASE PRESTASI
 # -------------------------------------------------------
-elif page == "⭐ Database Prestasi":
+elif page == "Database Prestasi":
     st.markdown("""
     <div class='main-header'>
-        <h1>⭐ Database Prestasi</h1>
+        <h1>Database Prestasi</h1>
         <p>Kelola daftar prestasi dan poinnya</p>
     </div>
     """, unsafe_allow_html=True)
@@ -967,12 +1107,12 @@ elif page == "⭐ Database Prestasi":
     
     with col1:
         st.markdown("<div class='card'>", unsafe_allow_html=True)
-        st.subheader("📋 Daftar Prestasi")
+        st.subheader("Daftar Prestasi")
         
         if df_db_prestasi.empty:
-            st.info("📭 Database prestasi kosong")
+            st.info("Database prestasi kosong")
         else:
-            search = st.text_input("🔍 Cari prestasi", "", key="search_pres")
+            search = st.text_input("Cari prestasi", "", key="search_pres")
             df_filtered = df_db_prestasi.copy()
             
             if search:
@@ -985,7 +1125,7 @@ elif page == "⭐ Database Prestasi":
     
     with col2:
         st.markdown("<div class='card'>", unsafe_allow_html=True)
-        st.subheader("➕ Tambah Prestasi")
+        st.subheader("Tambah Prestasi")
         
         with st.form("form_prestasi"):
             nama_pres = st.text_input("Nama Prestasi")
@@ -994,9 +1134,9 @@ elif page == "⭐ Database Prestasi":
                 "Akademik", "Non-Akademik", "Olahraga", "Seni", "Kepemimpinan", "Lainnya"
             ])
             
-            st.info("💡 Poin akan ditambahkan ke total siswa saat input")
+            st.info("Poin akan ditambahkan ke total siswa saat input")
             
-            submit = st.form_submit_button("✅ Simpan", use_container_width=True)
+            submit = st.form_submit_button("Simpan", use_container_width=True)
             
             if submit and nama_pres.strip():
                 try:
@@ -1005,13 +1145,13 @@ elif page == "⭐ Database Prestasi":
                     ws_pres_write = spreadsheet.worksheet("prestasi")
                     
                     ws_pres_write.append_row([nama_pres, int(poin_pres), kategori_pres])
-                    st.success(f"✅ Prestasi '{nama_pres}' berhasil ditambahkan!")
+                    st.success(f"Prestasi '{nama_pres}' berhasil ditambahkan!")
                     st.cache_data.clear()
                     st.rerun()
                 except Exception as e:
-                    st.error(f"❌ Gagal: {e}")
+                    st.error(f"Gagal: {e}")
             elif submit:
-                st.warning("⚠️ Isi nama prestasi!")
+                st.warning("Isi nama prestasi!")
         
         st.markdown("</div>", unsafe_allow_html=True)
 
@@ -1021,9 +1161,8 @@ elif page == "⭐ Database Prestasi":
 st.divider()
 st.markdown(
     f"<div style='text-align: center; color: var(--text-secondary); padding: 1rem;'>"
-    f"💻 Dashboard Siswa v3.1 Database System | "
-    f"Update: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')} | "
-    f"© 2024"
+    f"Dashboard Siswa v3.2 Enhanced | "
+    f"Update: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
     f"</div>",
     unsafe_allow_html=True
 )
